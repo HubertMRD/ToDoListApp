@@ -7,6 +7,13 @@ class ToDoViewModel: ViewModel() {
 
     val taskList = mutableStateListOf<Task>()
 
+    fun populateTaskList(){
+        addTask( "Buy eggs")
+        addTask("buy milk")
+        addTask( "Buy suger")
+        addTask("Buy flour")
+    }
+
     fun addTask(body: String){
         taskList.add(Task(body = body))
     }
@@ -21,4 +28,3 @@ class ToDoViewModel: ViewModel() {
     }
 
 }
-
