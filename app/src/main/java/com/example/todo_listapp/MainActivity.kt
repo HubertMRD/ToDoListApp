@@ -151,3 +151,7 @@ fun TaskCard(task: Task, toggleCompleted:(Task)->Unit, modifier: Modifier = Modi
         }
     }
 }
+
+
+
+
