@@ -15,7 +15,9 @@ class ToDoViewModel : ViewModel() {
     }
 
     fun addTask(body: String) {
-        taskList.add(Task(body = body))
+        if (body.isNotBlank()) {
+            taskList.add(Task(body = body))
+        }
     }
 
     fun deleteTask(task: Task) {
@@ -27,21 +29,18 @@ class ToDoViewModel : ViewModel() {
         taskList[index] = taskList[index].copy(completed = !task.completed)
     }
 
-    // NEW: Uncheck all tasks
     fun uncheckAll() {
         for (i in taskList.indices) {
             taskList[i] = taskList[i].copy(completed = false)
         }
     }
 
-    // NEW: Delete all completed tasks
     fun deleteCompleted() {
         taskList.removeAll { it.completed }
     }
 
-    // NEW: Move task to bottom
     fun moveToBottom(task: Task) {
         taskList.remove(task)
-        taskList.add(task.copy()) // copy to avoid key collision
+        taskList.add(task.copy()) // copy avoids key collision
     }
 }
