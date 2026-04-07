@@ -50,44 +50,54 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ToDo_ListAppTheme {
-
-                    ToDoScreen(
-
-                    )
-                }
+                ToDoScreen()
             }
         }
     }
-
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ToDoScreen( modifier: Modifier = Modifier, toDoViewModel: ToDoViewModel = viewModel()) {
+fun ToDoScreen(
+    modifier: Modifier = Modifier,
+    toDoViewModel: ToDoViewModel = viewModel()
+) {
     var taskBody by remember { mutableStateOf("") }
-    Scaffold (
+
+    Scaffold(
         topBar = {
             TopAppBar(
-                title = {Text (text = "To-Do List")},
+                title = { Text("To‑Do List") },
                 actions = {
-                    IconButton(
-                        onClick = { toDoViewModel.populateTaskList()
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Populate list"
-                        )
+
+                    // Uncheck all tasks
+                    IconButton(onClick = { toDoViewModel.uncheckAll() }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Uncheck all")
+                    }
+
+                    // Delete completed tasks
+                    IconButton(onClick = { toDoViewModel.deleteCompleted() }) {
+                        Icon(Icons.Default.DeleteSweep, contentDescription = "Delete completed")
+                    }
+
+                    // Populate list
+                    IconButton(onClick = { toDoViewModel.populateTaskList() }) {
+                        Icon(Icons.Default.Add, contentDescription = "Populate list")
                     }
                 }
             )
         }
     ) { innerPadding ->
+
         Column(
             modifier = modifier
-                .fillMaxSize().padding(innerPadding)
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
+
             TextField(
-                modifier = modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .padding(6.dp),
                 value = taskBody,
                 onValueChange = { taskBody = it },
@@ -101,75 +111,113 @@ fun ToDoScreen( modifier: Modifier = Modifier, toDoViewModel: ToDoViewModel = vi
                     }
                 )
             )
+
             LazyColumn {
                 items(
                     items = toDoViewModel.taskList,
                     key = { task -> task.id }
                 ) { task ->
+
                     val dismissState = rememberSwipeToDismissBoxState(
-                        confirmValueChange = {
-                            if (it == SwipeToDismissBoxValue.StartToEnd) {
-                                toDoViewModel.deleteTask(task)
-                                true
-                            } else
-                                false
+                        confirmValueChange = { value ->
+                            when (value) {
+                                SwipeToDismissBoxValue.StartToEnd -> {   // RIGHT → DELETE
+                                    toDoViewModel.deleteTask(task)
+                                    true
+                                }
+                                SwipeToDismissBoxValue.EndToStart -> {   // LEFT → MOVE TO BOTTOM
+                                    toDoViewModel.moveToBottom(task)
+                                    true
+                                }
+                                else -> false
+                            }
                         }
                     )
+
                     SwipeToDismissBox(
                         state = dismissState,
                         backgroundContent = { SwipeBackground(dismissState) },
                         content = {
-                            TaskCard(task, toggleCompleted = toDoViewModel::toggleTaskCompleted
+                            TaskCard(
+                                task = task,
+                                toggleCompleted = toDoViewModel::toggleTaskCompleted
                             )
                         },
-                        modifier = Modifier.padding(vertical = 1.dp).animateItem()
+                        modifier = Modifier
+                            .padding(vertical = 1.dp)
+                            .animateItem()
                     )
                 }
             }
-
         }
     }
 }
 
 
-
 @Composable
-fun SwipeBackground(dismissState: SwipeToDismissBoxState, modifier: Modifier = Modifier){
-    val color = if( dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd)
-            Color.Red
-        else
-            Color.Transparent
+fun SwipeBackground(dismissState: SwipeToDismissBoxState, modifier: Modifier = Modifier) {
+
+    val direction = dismissState.dismissDirection
+
+    val bgColor =
+        when (direction) {
+            SwipeToDismissBoxValue.StartToEnd -> Color.Red          // delete
+            SwipeToDismissBoxValue.EndToStart -> Color(0xFF2196F3)  // move to bottom
+            else -> Color.Transparent
+        }
+
     Row(
-        modifier.fillMaxSize().background(color)
+        modifier
+            .fillMaxSize()
+            .background(bgColor),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        if(dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd)
+
+        // LEFT SIDE ICON (delete)
+        if (direction == SwipeToDismissBoxValue.StartToEnd) {
             Icon(
                 Icons.Default.Delete,
-                contentDescription = "Delete"
+                contentDescription = "Delete",
+                modifier = Modifier.padding(start = 16.dp)
             )
+        }
+
+        // RIGHT SIDE ICON (move to bottom)
+        if (direction == SwipeToDismissBoxValue.EndToStart) {
+            Icon(
+                Icons.Default.ArrowDownward,
+                contentDescription = "Move to bottom",
+                modifier = Modifier.padding(end = 16.dp)
+            )
+        }
     }
 }
 
 
 @Composable
-fun TaskCard(task: Task, toggleCompleted:(Task)->Unit, modifier: Modifier = Modifier){
+fun TaskCard(
+    task: Task,
+    toggleCompleted: (Task) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
-      modifier = modifier.padding(8.dp).fillMaxWidth()
+        modifier = modifier
+            .padding(8.dp)
+            .fillMaxWidth()
     ) {
         Row(
-            modifier = modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = task.body,
-                modifier = modifier.padding(12.dp)
+                modifier = Modifier.padding(12.dp)
             )
             Checkbox(
                 checked = task.completed,
-                onCheckedChange =  {
-                    toggleCompleted(task)
-                }
+                onCheckedChange = { toggleCompleted(task) }
             )
         }
     }
