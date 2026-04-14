@@ -5,37 +5,20 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxState
-import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.*
 import androidx.compose.material3.rememberSwipeToDismissBoxState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -70,17 +53,14 @@ fun ToDoScreen(
                 title = { Text("To‑Do List") },
                 actions = {
 
-                    // Uncheck all tasks
                     IconButton(onClick = { toDoViewModel.uncheckAll() }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Uncheck all")
                     }
 
-                    // Delete completed tasks
                     IconButton(onClick = { toDoViewModel.deleteCompleted() }) {
                         Icon(Icons.Default.DeleteSweep, contentDescription = "Delete completed")
                     }
 
-                    // Populate list
                     IconButton(onClick = { toDoViewModel.populateTaskList() }) {
                         Icon(Icons.Default.Add, contentDescription = "Populate list")
                     }
@@ -121,11 +101,11 @@ fun ToDoScreen(
                     val dismissState = rememberSwipeToDismissBoxState(
                         confirmValueChange = { value ->
                             when (value) {
-                                SwipeToDismissBoxValue.StartToEnd -> {   // RIGHT → DELETE
+                                SwipeToDismissBoxValue.StartToEnd -> {
                                     toDoViewModel.deleteTask(task)
                                     true
                                 }
-                                SwipeToDismissBoxValue.EndToStart -> {   // LEFT → MOVE TO BOTTOM
+                                SwipeToDismissBoxValue.EndToStart -> {
                                     toDoViewModel.moveToBottom(task)
                                     true
                                 }
@@ -145,14 +125,12 @@ fun ToDoScreen(
                         },
                         modifier = Modifier
                             .padding(vertical = 1.dp)
-                            .animateItem()
                     )
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun SwipeBackground(dismissState: SwipeToDismissBoxState, modifier: Modifier = Modifier) {
@@ -161,8 +139,8 @@ fun SwipeBackground(dismissState: SwipeToDismissBoxState, modifier: Modifier = M
 
     val bgColor =
         when (direction) {
-            SwipeToDismissBoxValue.StartToEnd -> Color.Red          // delete
-            SwipeToDismissBoxValue.EndToStart -> Color(0xFF2196F3)  // move to bottom
+            SwipeToDismissBoxValue.StartToEnd -> Color.Red
+            SwipeToDismissBoxValue.EndToStart -> Color(0xFF2196F3)
             else -> Color.Transparent
         }
 
@@ -174,7 +152,6 @@ fun SwipeBackground(dismissState: SwipeToDismissBoxState, modifier: Modifier = M
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        // LEFT SIDE ICON (delete)
         if (direction == SwipeToDismissBoxValue.StartToEnd) {
             Icon(
                 Icons.Default.Delete,
@@ -183,7 +160,6 @@ fun SwipeBackground(dismissState: SwipeToDismissBoxState, modifier: Modifier = M
             )
         }
 
-        // RIGHT SIDE ICON (move to bottom)
         if (direction == SwipeToDismissBoxValue.EndToStart) {
             Icon(
                 Icons.Default.ArrowDownward,
@@ -193,7 +169,6 @@ fun SwipeBackground(dismissState: SwipeToDismissBoxState, modifier: Modifier = M
         }
     }
 }
-
 
 @Composable
 fun TaskCard(
