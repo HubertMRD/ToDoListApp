@@ -26,7 +26,9 @@ class ToDoViewModel : ViewModel() {
 
     fun toggleTaskCompleted(task: Task) {
         val index = taskList.indexOf(task)
-        taskList[index] = taskList[index].copy(completed = !task.completed)
+        if (index != -1) {
+            taskList[index] = taskList[index].copy(completed = !task.completed)
+        }
     }
 
     fun uncheckAll() {
@@ -40,7 +42,11 @@ class ToDoViewModel : ViewModel() {
     }
 
     fun moveToBottom(task: Task) {
-        taskList.remove(task)
-        taskList.add(task.copy()) // copy avoids key collision
+        val index = taskList.indexOf(task)
+        if (index != -1) {
+            val updated = taskList[index]
+            taskList.removeAt(index)
+            taskList.add(updated.copy(id = Task.newId()))
+        }
     }
 }
