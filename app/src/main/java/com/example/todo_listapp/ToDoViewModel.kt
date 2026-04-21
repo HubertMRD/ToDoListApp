@@ -50,3 +50,55 @@ class ToDoViewModel : ViewModel() {
         }
     }
 }
+________________________
+package com.example.todo_listapp
+
+import androidx.compose.runtime.mutableStateListOf
+import androidx.lifecycle.ViewModel
+
+class ToDoViewModel : ViewModel() {
+
+    private var nextId = 0
+
+    val taskList = mutableStateListOf<Task>()
+
+    fun addTask(body: String) {
+        if (body.isNotBlank()) {
+            taskList.add(Task(id = nextId++, body = body))
+        }
+    }
+
+    fun deleteTask(task: Task) {
+        taskList.remove(task)
+    }
+
+    fun toggleTaskCompleted(task: Task) {
+        val index = taskList.indexOf(task)
+        if (index != -1) {
+            taskList[index] = task.copy(completed = !task.completed)
+        }
+    }
+
+    fun uncheckAll() {
+        for (i in taskList.indices) {
+            taskList[i] = taskList[i].copy(completed = false)
+        }
+    }
+
+    fun deleteCompleted() {
+        taskList.removeAll { it.completed }
+    }
+
+    fun moveToBottom(task: Task) {
+        taskList.remove(task)
+        taskList.add(task)
+    }
+
+    fun populateTaskList() {
+        taskList.clear()
+        nextId = 0
+        repeat(5) {
+            addTask("Sample Task ${it + 1}")
+        }
+    }
+}
